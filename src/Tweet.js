@@ -14,6 +14,14 @@ class Tweet extends Component {
     };
   }
 
+  componentWillMount() {
+    fetch(`https://cloud.viewneo.com/social/twitter/search?q=${this.state.query}`)
+      .then( (response) => response.json())
+      .then((responseJson) => {
+        console.log(responseJson);
+      });
+  }
+
   render() {
     return (
       <div className="Tweet">

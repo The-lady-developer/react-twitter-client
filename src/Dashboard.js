@@ -23,9 +23,10 @@ class Dashboard extends Component {
       case "duration":
         this.setState({duration: event.target.value});
         break;
-      default:
       case "autoplay":
         this.setState({autoplay: +event.target.checked});
+        break;
+      default:
     }
   }
 
