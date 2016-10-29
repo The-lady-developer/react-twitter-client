@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
 
-import logo from './logo.svg';
 import './Tweet.css';
 
 class Tweet extends Component {
@@ -12,7 +11,7 @@ class Tweet extends Component {
       duration: this.props.location.query.duration,
       autoplay: this.props.location.query.video,
       tweets: [{
-        id: 0,
+        id: "xx",
         name: "Dummy Name",
         screen_name: "dummy_screen_name",
         avatar: "dummyurl.jpg",
@@ -54,25 +53,18 @@ class Tweet extends Component {
 
   render() {
     let tweets = this.state.tweets.map( (tweet) => {
-      return <div>
-          <p key={tweet.id}>
-            <img src={tweet.avatar} alt="Picture of {tweet.name}" /> {tweet.name} @{tweet.screen_name}<br />
-            {tweet.text}
-          </p><hr />
-        </div>;
+      const alt = 'Picture of ' + tweet.name;
+      return <p key={tweet.id.toString()}>
+          <img src={tweet.avatar} alt={alt} /> {tweet.name} <br /> @{tweet.screen_name}<br /><br />
+          {tweet.text}<br /><br /><br />
+        </p>;
     });
 
     return (
       <div className="Tweet">
-        <div className="Tweet-header">
-          <img src={logo} className="Tweet-logo" alt="logo" />
-          <h2>The Tweet</h2>
-        </div>
-
         <p className="Dashboard-intro">
           <Link to={`/dashboard`}>Dashboard</Link>
         </p>
-
 
         <p className="Tweet-intro">
           Query: {this.state.query}<br />

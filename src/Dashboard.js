@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 
-import logo from './logo.svg';
 import './Dashboard.css';
 
 class Dashboard extends Component {
@@ -19,7 +18,7 @@ class Dashboard extends Component {
     switch (event.target.name) {
       case "query":
         this.setState({query: event.target.value});
-        break;  
+        break;
       case "duration":
         this.setState({duration: event.target.value});
         break;
@@ -42,15 +41,10 @@ class Dashboard extends Component {
       }
     });
   }
-  
+
   render() {
     return (
       <div className="Dashboard">
-        <div className="Dashboard-header">
-          <img src={logo} className="Dashboard-logo" alt="logo" />
-          <h2>Dashboard</h2>
-        </div>
-        
         <p>
           Search Query: <input type="text"
             placeholder="Query"
