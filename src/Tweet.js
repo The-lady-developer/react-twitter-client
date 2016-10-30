@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
+// import $ from 'jquery';
 
 import './Tweet.css';
 
@@ -34,13 +35,22 @@ class Tweet extends Component {
   async componentWillMount() {
     const fetchedTweets = await this.getTweets();
 
+
     let tweets = fetchedTweets.map( (tweet) => {
+      let media = false;
+      if (tweet.entities.media) {
+        media = tweet.entities.media[0].media_url;
+      } else {
+        media = 'http://pbs.twimg.com/media/CvricOXXgAAme3s.jpg';
+      }
+
       return {
         id: tweet.id,
         name: tweet.user.name,
         screen_name: tweet.user.screen_name,
         avatar: tweet.user.profile_image_url,
-        text: tweet.text
+        text: tweet.text,
+        media: media
       };
     });
 
@@ -48,34 +58,56 @@ class Tweet extends Component {
   }
 
   async componentDidMount() {
-    // populate();
+    const intervalId = setInterval(() => {
+      let tweets = this.state.tweets;
+      tweets.push(tweets.shift());
+      this.setState( {tweets} );
+    }, this.state.duration * 1000);
+    this.setState({intervalId: intervalId});
+  }
+
+  componentWillUnmount() {
+   clearInterval(this.state.intervalId);
   }
 
   render() {
-    let tweets = this.state.tweets.map( (tweet) => {
-      const alt = 'Picture of ' + tweet.name;
-      return <p key={tweet.id.toString()}>
-          <img src={tweet.avatar} alt={alt} /> {tweet.name} <br /> @{tweet.screen_name}<br /><br />
-          {tweet.text}<br /><br /><br />
-        </p>;
-    });
+    let tweet = this.state.tweets[0];
+    const alt = 'Picture of ' + tweet.name;
+    const hasTweetMedia = (tweet.media ? 'wrapper has-tweet-media' : 'wrapper');
+    const media = (tweet.media ? <img className="tweet-img" src={tweet.media} role="presentation" /> : '');
 
     return (
       <div className="Tweet">
-        <p className="Dashboard-intro">
-          <Link to={`/dashboard`}>Dashboard</Link>
-        </p>
+        <div className="Tweet-intro">
+          <p>
+            <Link to={`/dashboard`}>Dashboard</Link>
+          </p>
 
-        <p className="Tweet-intro">
-          Query: {this.state.query}<br />
-          Duration: {this.state.duration}<br />
-          Video: {this.state.autoplay}<br />
-        </p>
+          <p>
+            Query: {this.state.query}<br />
+            Duration: {this.state.duration}<br />
+            Video: {this.state.autoplay}<br />
+          </p>
+        </div>
 
-        <hr />
 
-        <div>
-          {tweets}
+        <div id="tweets">
+          <div className={hasTweetMedia} key={tweet.id.toString()}>
+
+            <div className="author-wrapper">
+              <div className="author">
+                <img className="avatar" src={tweet.avatar} alt={alt} />
+                <h1 className="author-name">{tweet.name}</h1>
+                <h2 className="author-username">@{tweet.screen_name}</h2>
+              </div>
+
+              <div className="text">
+                {tweet.text}
+              </div>
+            </div>
+
+            {media}
+          </div>
         </div>
 
       </div>
