@@ -12,14 +12,22 @@ class Tweet extends Component {
       duration: this.props.location.query.duration,
       autoplay: this.props.location.query.video,
       tweets: [{
-        id: "xx",
-        name: "Dummy Name",
-        screen_name: "dummy_screen_name",
-        avatar: "dummyurl.jpg",
-        text: "Dummy text ipsum. #Hashtax"
+        id: '',
+        name: '',
+        screen_name: '',
+        avatar: '',
+        text: '',
+        media: { type: '', url: '', sizes: {w: '', h: ''} }
       }]
     };
   }
+
+  deepSearch(obj, path){
+    for (var i=0, path=path.split('.'), len=path.length; i<len; i++){
+        obj = obj[path[i]];
+    };
+    return obj;
+  };
 
   async getTweets() {
     try {
@@ -38,10 +46,25 @@ class Tweet extends Component {
 
     let tweets = fetchedTweets.map( (tweet) => {
       let media = false;
+      let type = false;
+      let sizes = {w: '', h: ''};
+
+      console.log(this.deepSearch(tweet, 'youtu'));
+
       if (tweet.entities.media) {
-        media = tweet.entities.media[0].media_url;
-      } else {
-        media = 'http://pbs.twimg.com/media/CvricOXXgAAme3s.jpg';
+        if (tweet.extended_entities.media[0].type === 'photo') {
+          type = 'photo';
+          media = tweet.extended_entities.media[0].media_url;
+        } else if (tweet.extended_entities.media[0].type === 'video') {
+          type = 'video';
+          media = tweet.extended_entities.media[0].video_info.variants.find((x) => x.bitrate === 832000).url;
+          sizes.w = tweet.extended_entities.media[0].sizes.large.w;
+          sizes.h = tweet.extended_entities.media[0].sizes.large.h;
+        } else if (this.deepSearch(tweet, 'youtu.be')) {
+          console.log('yay!');
+          type = 'youtube';
+          media = tweet.entities.urls[0].display_url.split('/')[1];
+        }
       }
 
       return {
@@ -50,7 +73,7 @@ class Tweet extends Component {
         screen_name: tweet.user.screen_name,
         avatar: tweet.user.profile_image_url,
         text: tweet.text,
-        media: media
+        media: { type, url: media, sizes }
       };
     });
 
@@ -74,7 +97,17 @@ class Tweet extends Component {
     let tweet = this.state.tweets[0];
     const alt = 'Picture of ' + tweet.name;
     const hasTweetMedia = (tweet.media ? 'wrapper has-tweet-media' : 'wrapper');
-    const media = (tweet.media ? <img className="tweet-img" src={tweet.media} role="presentation" /> : '');
+    let media;
+
+    if (tweet.media && tweet.media.type === 'photo') {
+      media = <div className="media-wrapper"><img className="tweet-img" src={tweet.media.url} role="presentation" /></div>;
+    } else if (tweet.media && tweet.media.type === "video") {
+      const url = tweet.media.url + '?autoplay=' + this.state.autoplay + '&loop=1';
+      media = <div className="media-wrapper"><iframe className="tweet-img" width={tweet.media.sizes.w} height={tweet.media.sizes.h} src={url} frameBorder="0"></iframe></div>;
+    } else if (tweet.media && tweet.media.type === "youtube") {
+      const url = tweet.media.url + '?autoplay=' + this.state.autoplay + '&loop=1';
+      media = <div className="media-wrapper"><iframe className="tweet-img" width={tweet.media.sizes.w} height={tweet.media.sizes.h} src={url} frameBorder="0"></iframe></div>;
+    }
 
     return (
       <div className="Tweet">
@@ -97,8 +130,10 @@ class Tweet extends Component {
             <div className="author-wrapper">
               <div className="author">
                 <img className="avatar" src={tweet.avatar} alt={alt} />
-                <h1 className="author-name">{tweet.name}</h1>
-                <h2 className="author-username">@{tweet.screen_name}</h2>
+                <div className="author-details">
+                  <h1 className="author-name">{tweet.name}</h1>
+                  <h2 className="author-username">@{tweet.screen_name}</h2>
+                </div>
               </div>
 
               <div className="text">
