@@ -8,9 +8,11 @@ class Tweet extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      query: this.props.location.query.q,
+      query: encodeURIComponent(this.props.location.query.q),
+      quantity: this.props.location.query.quantity,
       duration: this.props.location.query.duration,
       autoplay: this.props.location.query.video,
+      hide_sensitive: (parseInt(this.props.location.query.hide_sensitive, 10) === 1? ' filter:safe':''),
       tweets: [{
         id: '',
         name: '',
@@ -32,7 +34,8 @@ class Tweet extends Component {
   async getTweets() {
     try {
       let responseJson = {};
-      let response = await fetch(`https://cloud.viewneo.com/social/twitter/search?q=${this.state.query}`, { mode: 'cors', cache: 'force-cache' });
+      const uri = encodeURI(`https://cloud.viewneo.com/social/twitter/search?q=${this.state.query}${this.state.hide_sensitive}`);
+      let response = await fetch(uri, { mode: 'cors', cache: 'force-cache' });
       if (response.ok) {
         responseJson = await response.json();
       }
@@ -48,6 +51,9 @@ class Tweet extends Component {
 
 
     if (fetchedTweets) {
+      console.log(this.state.quantity, fetchedTweets);
+      fetchedTweets.splice(parseInt(this.state.quantity, 10));
+      console.log(fetchedTweets);
       let tweets = fetchedTweets.map( (tweet) => {
         let media = false;
         let type = false;
@@ -59,13 +65,15 @@ class Tweet extends Component {
             media = tweet.extended_entities.media[0].media_url;
           } else if (tweet.extended_entities.media[0].type === 'video') {
             type = 'video';
-            media = tweet.extended_entities.media[0].video_info.variants.find((x) => x.bitrate === 832000).url;
-            sizes.w = tweet.extended_entities.media[0].sizes.large.w;
-            sizes.h = tweet.extended_entities.media[0].sizes.large.h;
-          } else if (this.deepSearch(tweet, 'youtu.be')) {
-            console.log('yay!');
-            type = 'youtube';
-            media = tweet.entities.urls[0].display_url.split('/')[1];
+            //
+            let maxbitrate = tweet.extended_entities.media[0].video_info.variants.reduce((max, x) => (x.bitrate > max) ? x.bitrate : max, 0);
+            media = tweet.extended_entities.media[0].video_info.variants.find((x) => x.bitrate === maxbitrate).url;
+            // sizes.w = tweet.extended_entities.media[0].sizes.large.w;
+            // sizes.h = tweet.extended_entities.media[0].sizes.large.h;
+          // } else if (this.deepSearch(tweet, 'youtu.be')) {
+          //   console.log('yay!');
+          //   type = 'youtube';
+          //   media = tweet.entities.urls[0].display_url.split('/')[1];
           }
         }
 
@@ -74,7 +82,11 @@ class Tweet extends Component {
           name: tweet.user.name,
           screen_name: tweet.user.screen_name,
           avatar: tweet.user.profile_image_url,
-          text: tweet.text,
+          // this regex only captures english characters
+          // not latin. better than nothing for now.
+          // here, have a look:
+          // https://github.com/twitter/twitter-text/blob/master/js/twitter-text.js
+          text: tweet.text.replace(/#(\w+)/g, '<span class="hashtag">#$1</span>'),
           media: { type, url: media, sizes }
         };
       });
@@ -107,12 +119,16 @@ class Tweet extends Component {
     if (tweet.media && tweet.media.type === 'photo') {
       media = <div className="media-wrapper"><img className="tweet-img" src={tweet.media.url} role="presentation" /></div>;
     } else if (tweet.media && tweet.media.type === "video") {
-      const url = tweet.media.url + '?autoplay=' + this.state.autoplay + '&loop=1';
-      media = <div className="media-wrapper"><iframe className="tweet-img" width={tweet.media.sizes.w} height={tweet.media.sizes.h} src={url} frameBorder="0"></iframe></div>;
-    } else if (tweet.media && tweet.media.type === "youtube") {
-      const url = tweet.media.url + '?autoplay=' + this.state.autoplay + '&loop=1';
-      media = <div className="media-wrapper"><iframe className="tweet-img" width={tweet.media.sizes.w} height={tweet.media.sizes.h} src={url} frameBorder="0"></iframe></div>;
+      if (parseInt(this.state.autoplay, 10) === 1) {
+      media = <div className="media-wrapper"><video className="tweet-img" width="100%" height="100%" src={tweet.media.url} autoPlay loop></video></div>;
+      } else {
+      media = <div className="media-wrapper"><video className="tweet-img" width="100%" height="100%" src={tweet.media.url} loop></video></div>;
     }
+    // } else if (tweet.media && tweet.media.type === "youtube") {
+    //   media = <div className="media-wrapper"><video className="tweet-img" width="100%" height="100%" src={tweet.media.url} {autoplay} loop></video></div>;
+    }
+
+    const text = {__html:tweet.text};
 
     return (
       <div className="Tweet">
@@ -141,9 +157,7 @@ class Tweet extends Component {
                 </div>
               </div>
 
-              <div className="text">
-                {tweet.text}
-              </div>
+              <div className="text" dangerouslySetInnerHTML={text}></div>
             </div>
 
             {media}
