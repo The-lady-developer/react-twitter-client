@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
+import twitter from 'twitter-text';
 // import $ from 'jquery';
 
 import './Tweet.css';
@@ -16,8 +17,8 @@ class Tweet extends Component {
       tweets: [{
         id: '',
         name: '',
-        screen_name: '',
-        avatar: '',
+        screen_name: 'Loading..',
+        avatar: 'https://abs.twimg.com/sticky/default_profile_images/default_profile_1_400x400.png',
         text: '',
         media: { type: '', url: '', sizes: {w: '', h: ''} }
       }]
@@ -51,9 +52,7 @@ class Tweet extends Component {
 
 
     if (fetchedTweets) {
-      console.log(this.state.quantity, fetchedTweets);
       fetchedTweets.splice(parseInt(this.state.quantity, 10));
-      console.log(fetchedTweets);
       let tweets = fetchedTweets.map( (tweet) => {
         let media = false;
         let type = false;
@@ -80,13 +79,13 @@ class Tweet extends Component {
         return {
           id: tweet.id,
           name: tweet.user.name,
-          screen_name: tweet.user.screen_name,
+          screen_name: '@' + tweet.user.screen_name,
           avatar: tweet.user.profile_image_url,
           // this regex only captures english characters
           // not latin. better than nothing for now.
           // here, have a look:
           // https://github.com/twitter/twitter-text/blob/master/js/twitter-text.js
-          text: tweet.text.replace(/#(\w+)/g, '<span class="hashtag">#$1</span>'),
+          text: twitter.autoLinkHashtags(twitter.autoLinkUsernamesOrLists(twitter.htmlEscape(tweet.text))),
           media: { type, url: media, sizes }
         };
       });
@@ -153,7 +152,7 @@ class Tweet extends Component {
                 <img className="avatar" src={tweet.avatar} alt={alt} />
                 <div className="author-details">
                   <h1 className="author-name">{tweet.name}</h1>
-                  <h2 className="author-username">@{tweet.screen_name}</h2>
+                  <h2 className="author-username">{tweet.screen_name}</h2>
                 </div>
               </div>
 
