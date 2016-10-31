@@ -19,11 +19,15 @@ body {
   display: block;
 }
 
-.author-wrapper {}
+.author-wrapper {
+  align-self: center;
+}
 
 .media-wrapper {
   text-align: center;
   object-fit: contain;
+  min-width: 45vw;
+  max-height: 90vh;
 }
 
 
@@ -174,7 +178,7 @@ body {
   }
 
   .has-tweet-media .author-wrapper {
-    width: 45vw;
+    /*width: 45vw;*/
   }
 
   .media-wrapper {/*
@@ -194,6 +198,7 @@ body {
 
   .tweet-img {
     margin-top: 1vh;
+    max-height: 90vh;
     /*margin-left: 4em;*/
     /*width: 100%;*/
   }

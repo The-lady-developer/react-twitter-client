@@ -22,17 +22,20 @@ class Tweet extends Component {
     };
   }
 
-  deepSearch(obj, path){
-    for (var i=0, path=path.split('.'), len=path.length; i<len; i++){
-        obj = obj[path[i]];
-    };
-    return obj;
-  };
+  // deepSearch(obj, path){
+  //   for (var i=0, path=path.split('.'), len=path.length; i<len; i++){
+  //       obj = obj[path[i]];
+  //   };
+  //   return obj;
+  // };
 
   async getTweets() {
     try {
-      let response = await fetch(`https://cloud.viewneo.com/social/twitter/search?q=${this.state.query}`);
-      let responseJson = await response.json();
+      let responseJson = {};
+      let response = await fetch(`https://cloud.viewneo.com/social/twitter/search?q=${this.state.query}`, { mode: 'cors', cache: 'force-cache' });
+      if (response.ok) {
+        responseJson = await response.json();
+      }
 
       return responseJson.statuses;
     } catch (error) {
@@ -44,40 +47,42 @@ class Tweet extends Component {
     const fetchedTweets = await this.getTweets();
 
 
-    let tweets = fetchedTweets.map( (tweet) => {
-      let media = false;
-      let type = false;
-      let sizes = {w: '', h: ''};
+    if (fetchedTweets) {
+      let tweets = fetchedTweets.map( (tweet) => {
+        let media = false;
+        let type = false;
+        let sizes = {w: '', h: ''};
 
-      console.log(this.deepSearch(tweet, 'youtu'));
-
-      if (tweet.entities.media) {
-        if (tweet.extended_entities.media[0].type === 'photo') {
-          type = 'photo';
-          media = tweet.extended_entities.media[0].media_url;
-        } else if (tweet.extended_entities.media[0].type === 'video') {
-          type = 'video';
-          media = tweet.extended_entities.media[0].video_info.variants.find((x) => x.bitrate === 832000).url;
-          sizes.w = tweet.extended_entities.media[0].sizes.large.w;
-          sizes.h = tweet.extended_entities.media[0].sizes.large.h;
-        } else if (this.deepSearch(tweet, 'youtu.be')) {
-          console.log('yay!');
-          type = 'youtube';
-          media = tweet.entities.urls[0].display_url.split('/')[1];
+        if (tweet.entities.media) {
+          if (tweet.extended_entities.media[0].type === 'photo') {
+            type = 'photo';
+            media = tweet.extended_entities.media[0].media_url;
+          } else if (tweet.extended_entities.media[0].type === 'video') {
+            type = 'video';
+            media = tweet.extended_entities.media[0].video_info.variants.find((x) => x.bitrate === 832000).url;
+            sizes.w = tweet.extended_entities.media[0].sizes.large.w;
+            sizes.h = tweet.extended_entities.media[0].sizes.large.h;
+          } else if (this.deepSearch(tweet, 'youtu.be')) {
+            console.log('yay!');
+            type = 'youtube';
+            media = tweet.entities.urls[0].display_url.split('/')[1];
+          }
         }
-      }
 
-      return {
-        id: tweet.id,
-        name: tweet.user.name,
-        screen_name: tweet.user.screen_name,
-        avatar: tweet.user.profile_image_url,
-        text: tweet.text,
-        media: { type, url: media, sizes }
-      };
-    });
+        return {
+          id: tweet.id,
+          name: tweet.user.name,
+          screen_name: tweet.user.screen_name,
+          avatar: tweet.user.profile_image_url,
+          text: tweet.text,
+          media: { type, url: media, sizes }
+        };
+      });
 
-    this.setState( { tweets } );
+      this.setState( { tweets } );
+    } else {
+      this.setState( { tweets: [{id: 0, name: 'Failed to load API'}]});
+    }
   }
 
   async componentDidMount() {
