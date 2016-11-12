@@ -54,45 +54,88 @@ class Dashboard extends Component {
 
   render() {
     return (
-      <div className="Dashboard">
-        <p>
-          Search Query: <input type="text"
-            placeholder="Query"
-            defaultValue={this.state.query}
-            name="query"
-            onChange={this.handleChange} /><br />
+      <div className="container Dashboard">
+        <div className="well">
+          <h1>Welcome to Tweet dashboard</h1>
+        </div>
+        <div className="form-horizontal">
+          <div className="form-group">
+            <label className="control-label col-xs-3" htmlFor="query">Search Query:</label>
+            <div className="col-xs-8">
+              <input type="text"
+                placeholder="Query"
+                defaultValue={this.state.query}
+                name="query"
+                id="query"
+                className="form-control"
+                onChange={this.handleChange} />
+            </div>
+          </div>
 
-          Number of Tweets: <input type="range"
-            placeholder="10"
-            defaultValue={this.state.quantity}
-            min="1" max="15"
-            name="quantity"
-            onChange={this.handleChange} /> {this.state.quantity}<br />
+          <div className="form-group">
+            <label className="control-label col-xs-3" htmlFor="quantity">Number of Tweets:</label>
+            <div className="col-xs-7">
+              <input type="range"
+                placeholder="10"
+                defaultValue={this.state.quantity}
+                min="1" max="15"
+                name="quantity"
+                id="quantity"
+                className="form-control"
+                onChange={this.handleChange} />
+            </div>
+            <div className="col-xs-1">
+              {this.state.quantity}
+            </div>
+          </div>
 
-          Duration: <input type="number"
-            placeholder="30"
-            defaultValue={this.state.duration}
-            name="duration"
-            onChange={this.handleChange} /><br />
+          <div className="form-group">
+            <label className="control-label col-xs-3" htmlFor="duration">Duration:</label>
+            <div className="col-xs-8">
+              <input type="number"
+                placeholder="30"
+                defaultValue={this.state.duration}
+                name="duration"
+                id="duration"
+                className="form-control"
+                onChange={this.handleChange} />
+            </div>
+          </div>
 
-          <input type="checkbox"
-            defaultChecked={true}
-            name="autoplay"
-            id="autoplay"
-            onChange={this.handleChange} />
-          <label htmlFor="autoplay">Video Autoplay</label><br />
+          <div className="form-group">
+            <div className="col-xs-offset-3 col-xs-8 text-left">
+              <div className="checkbox">
+                <label>
+                  <input type="checkbox"
+                    defaultChecked={true}
+                    name="autoplay"
+                    id="autoplay"
+                    onChange={this.handleChange} /> Video Autoplay
+                </label>
+              </div>
+            </div>
+          </div>
 
-          <input type="checkbox"
-            defaultChecked={true}
-            name="hide_sensitive"
-            id="hide_sensitive"
-            onChange={this.handleChange} />
-          <label htmlFor="hide_sensitive">Filter Sensitive Content</label><br />
+          <div className="form-group">
+            <div className="col-xs-offset-3 col-xs-8 text-left">
+              <div className="checkbox">
+                <label>
+                  <input type="checkbox"
+                    defaultChecked={true}
+                    name="hide_sensitive"
+                    id="hide_sensitive"
+                    onChange={this.handleChange} /> Filter Sensitive Content
+                </label>
+              </div>
+            </div>
+          </div>
 
-          <button onClick={this.handleSubmit}>
-            Submit
-          </button>
-        </p>
+          <div className="form-group">
+            <div className="col-xs-offset-3 col-xs-8">
+              <button onClick={this.handleSubmit} type="submit" className="btn btn-default">Sign in</button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
 import twitter from 'twitter-text';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 // import $ from 'jquery';
 
 import './Tweet.css';
@@ -13,7 +14,7 @@ class Tweet extends Component {
       quantity: this.props.location.query.quantity,
       duration: this.props.location.query.duration,
       autoplay: this.props.location.query.video,
-      hide_sensitive: (parseInt(this.props.location.query.hide_sensitive, 10) === 1? ' filter:safe':''),
+      hide_sensitive: (parseInt(this.props.location.query.hide_sensitive, 10) === 1 ? ' filter:safe':''),
       tweets: [{
         id: '',
         name: '',
@@ -145,22 +146,29 @@ class Tweet extends Component {
 
 
         <div id="tweets">
-          <div className={hasTweetMedia} key={tweet.id.toString()}>
+          <ReactCSSTransitionGroup
+            transitionName="fade"
+            transitionEnterTimeout={300}
+            transitionLeaveTimeout={200}
+            transitionAppear={true}
+            transitionAppearTimeout={1000}>
+            <div className={hasTweetMedia} key={tweet.id.toString()}>
 
-            <div className="author-wrapper">
-              <div className="author">
-                <img className="avatar" src={tweet.avatar} alt={alt} />
-                <div className="author-details">
-                  <h1 className="author-name">{tweet.name}</h1>
-                  <h2 className="author-username">{tweet.screen_name}</h2>
+              <div className="author-wrapper">
+                <div className="author">
+                  <img className="avatar" src={tweet.avatar} alt={alt} />
+                  <div className="author-details">
+                    <h1 className="author-name">{tweet.name}</h1>
+                    <h2 className="author-username">{tweet.screen_name}</h2>
+                  </div>
                 </div>
+
+                <div className="text" dangerouslySetInnerHTML={text}></div>
               </div>
 
-              <div className="text" dangerouslySetInnerHTML={text}></div>
+              {media}
             </div>
-
-            {media}
-          </div>
+          </ReactCSSTransitionGroup>
         </div>
 
       </div>

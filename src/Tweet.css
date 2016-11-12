@@ -5,6 +5,14 @@ body {
   font-family: 'Arimo', Arial, "Helvetica Neue", Helvetica, sans-serif;
 }
 
+
+a,
+a:hover,
+a:active,
+a:visited {
+  color: white;
+}
+
 .Tweet-intro {
   display: none;
 }
@@ -269,4 +277,30 @@ a,
   .has-tweet-media .text {
     font-size: 3.5em;
   }
+}
+
+
+
+
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 400ms ease-out;
+}
+
+.fade-leave {
+  opacity: 1;
+}
+
+.fade-leave-active {
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+}
+
+.fade-appear-active {
+  opacity: 1;
+  transition: opacity 1000ms ease-out;
 }
