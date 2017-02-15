@@ -1,1 +1,1 @@
-# Adversign Media GmbH
+# Responsive React Twitter Dashboard
